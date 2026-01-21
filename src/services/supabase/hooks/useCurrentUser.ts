@@ -17,14 +17,13 @@ export function useCurrentUser() {
         setIsLoading(false);
       });
 
-      const {data} = supabase.auth.onAuthStateChange((_, session) => {
-        setUser(session?.user ?? null);
-      });
+    const { data } = supabase.auth.onAuthStateChange((_, session) => {
+      setUser(session?.user ?? null);
+    });
 
-      return () => {
-        data?.subscription.unsubscribe();
-      };
-
+    return () => {
+      data?.subscription.unsubscribe();
+    };
   }, []);
 
   return { user, isLoading };

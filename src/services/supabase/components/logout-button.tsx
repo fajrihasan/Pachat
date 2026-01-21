@@ -1,6 +1,6 @@
 "use client";
 
-import { createClient } from "@/components/services/supabase/client";
+import { createClient } from "@/services/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 
@@ -13,5 +13,9 @@ export function LogoutButton() {
     router.push("/auth/login");
   };
 
-  return <Button onClick={logout}>Logout</Button>;
+  return (
+    <Button variant="outline" size="sm" onClick={logout}>
+      Logout
+    </Button>
+  );
 }

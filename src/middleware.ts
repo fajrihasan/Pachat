@@ -1,4 +1,4 @@
-import { updateSession } from "@/components/services/supabase/middleware";
+import { updateSession } from "@/services/supabase/middleware";
 import { type NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
