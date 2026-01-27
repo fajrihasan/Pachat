@@ -2,7 +2,7 @@ import { Message } from "@/services/supabase/actions/messages";
 import { User2Icon } from "lucide-react";
 import Image from "next/image";
 
-const DATE_FORMATTER = new Intl.DateTimeFormat(undefined, {
+const DATE_FORMATTER = new Intl.DateTimeFormat("id-ID", {
   dateStyle: "short",
   timeStyle: "short",
 });

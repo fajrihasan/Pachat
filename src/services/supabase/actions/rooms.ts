@@ -44,5 +44,5 @@ export async function createRoom(unsafeData: z.infer<typeof CreateRoomSchema>) {
         return {error: true, message:"failed to add user to room"}
     }
 
-    redirect(`/room/${room.id}`)
+    redirect(`/rooms/${room.id}`)
 }
