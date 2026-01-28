@@ -30,7 +30,7 @@ export default function JoinRoomButton({
     }
 
     router.refresh();
-    router.push(`/room/${roomId}`);
+    router.push(`/rooms/${roomId}`);
 
     return { error: false };
   }

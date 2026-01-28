@@ -4,7 +4,7 @@ import { ChatInput } from "@/components/chat-input";
 import { Message } from "@/services/supabase/actions/messages";
 import { ChatMessage } from "@/components/chat-message";
 import { RealtimeChannel } from "@supabase/supabase-js";
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { createClient } from "@/services/supabase/client";
 
 export default function RoomClient({
@@ -23,10 +23,18 @@ export default function RoomClient({
   };
   messages: Message[];
 }) {
-  const { connectedUsers } = userRealTimeChat({
+  const { connectedUsers, messages: realtimeMessages } = userRealTimeChat({
     roomId: room.id,
     userId: user.id,
   });
+  const [sentMessages, setSentMessages] = useState<
+    (Message & { status: "pending" | "error" | "success" })[]
+  >([]);
+
+  const visibleMessages = messages.toReversed().concat(
+    realtimeMessages,
+    sentMessages.filter((m) => !realtimeMessages.find((rm) => rm.id === m.id)),
+  );
 
   return (
     <div className="container mx-auto h-screen-with-header border border-y-0 flex flex-col">
@@ -42,19 +50,49 @@ export default function RoomClient({
         <InviteUserModal roomId={room.id} />
       </div>
       <div
-        className="grow overflow-y-auto flex flex-col-reverse"
+        className="grow overflow-y-auto"
         style={{
           scrollbarWidth: "thin",
           scrollbarColor: "var(--border) transparent",
         }}
       >
         <div>
-          {messages.toReversed().map((message) => (
+          {visibleMessages.map((message) => (
             <ChatMessage key={message.id} {...message} />
           ))}
         </div>
       </div>
-      <ChatInput roomId={room.id} />
+      <ChatInput
+        roomId={room.id}
+        onSend={(message) => {
+          setSentMessages((prev) => [
+            ...prev,
+            {
+              id: message.id,
+              text: message.text,
+              created_at: new Date().toISOString(),
+              author_id: user.id,
+              author: {
+                name: user.name,
+                image_url: user.image_url,
+              },
+              status: "pending",
+            },
+          ]);
+        }}
+        onSuccessfullSend={(message) => {
+          setSentMessages((prev) =>
+            prev.map((m) =>
+              m.id === message.id ? { ...message, status: "success" } : m,
+            ),
+          );
+        }}
+        onErrorSend={(id) => {
+          setSentMessages((prev) =>
+            prev.map((m) => (m.id === id ? { ...m, status: "error" } : m)),
+          );
+        }}
+      />
     </div>
   );
 }
@@ -76,22 +114,23 @@ function userRealTimeChat({
 
   useEffect(() => {
     const supabase = createClient();
+    console.log("use effect jalan");
     let newChannel: RealtimeChannel;
     let cancel = false;
 
     supabase.realtime.setAuth().then(() => {
       if (cancel) return;
       newChannel = supabase.channel(`room:${roomId}:messages`, {
-        config: {presence: { key: userId } },
+        config: { presence: { key: userId }, broadcast: { self: true } },
       });
 
       newChannel
         .on("presence", { event: "sync" }, () => {
           setConnectedUsers(Object.keys(newChannel.presenceState()).length);
         })
-        .on("broadcast", { event: "INSERT" }, (payload) => {
-          const record = payload.payload.record
-          console.log(payload)
+        .on("broadcast", { event: "new_message" }, (payload) => {
+          console.log("Realtime payload:", payload.payload);
+          const record = payload.payload;
           setMessages((prevMessages) => [
             ...prevMessages,
             {
@@ -104,13 +143,13 @@ function userRealTimeChat({
                 image_url: record.author.image_url,
               },
             },
-          ])
+          ]);
         })
         .subscribe((status) => {
           if (status !== "SUBSCRIBED") return;
           newChannel.track({ userId });
-        })
-    })
+        });
+    });
 
     return () => {
       cancel = true;
@@ -122,4 +161,3 @@ function userRealTimeChat({
 
   return { connectedUsers, messages };
 }
-
