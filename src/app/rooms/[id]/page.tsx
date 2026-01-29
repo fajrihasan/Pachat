@@ -59,8 +59,9 @@ async function getMessages(roomId: string) {
       .select("id, text, created_at, author_id, author:user_profile (name, image_url)")
       .eq("chat_room_id", roomId)
       .order("created_at", { ascending: false })
-      .limit(100);
+      .limit(10);
 
     if (error) return [];
-    return data;
+    // Reverse agar order dari lama ke baru (ascending dalam display)
+    return data.reverse();
 }
