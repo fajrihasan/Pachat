@@ -9,8 +9,9 @@ import { useRouter } from "next/navigation";
 export default function LeaveRoomButton({
   children,
   roomId,
+  onSuccess,
   ...props
-}: Omit<ComponentProps<typeof ActionButton>, "action"> & { roomId: string }) {
+}: Omit<ComponentProps<typeof ActionButton>, "action"> & { roomId: string; onSuccess?: () => void }) {
   const { user } = useCurrentUser();
   const router = useRouter();
 
@@ -30,6 +31,7 @@ export default function LeaveRoomButton({
       return { error: true, message: "Failed to leave room" };
     }
 
+    onSuccess?.();
     router.refresh();
 
     return { error: false };

@@ -6,7 +6,6 @@ import { ChatMessage } from "@/components/chat-message";
 import { RealtimeChannel } from "@supabase/supabase-js";
 import { useEffect, useState, useRef } from "react";
 import { createClient } from "@/services/supabase/client";
-import { InviteUserModal } from "@/components/invite.user.modal";
 import { Button } from "@/components/ui/button";
 import dynamic from "next/dynamic";
 

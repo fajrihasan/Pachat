@@ -9,8 +9,9 @@ import { useRouter } from "next/navigation";
 export default function JoinRoomButton({
   children,
   roomId,
+  onSuccess,
   ...props
-}: Omit<ComponentProps<typeof ActionButton>, "action"> & { roomId: string }) {
+}: Omit<ComponentProps<typeof ActionButton>, "action"> & { roomId: string; onSuccess?: () => void }) {
   const { user } = useCurrentUser();
   const router = useRouter();
 
@@ -29,6 +30,7 @@ export default function JoinRoomButton({
       return { error: true, message: "Failed to join room" };
     }
 
+    onSuccess?.();
     router.refresh();
     router.push(`/rooms/${roomId}`);
 
